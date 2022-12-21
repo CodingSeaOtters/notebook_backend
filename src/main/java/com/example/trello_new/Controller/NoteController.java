@@ -5,6 +5,7 @@ import com.example.trello_new.Entities.Note;
 import com.example.trello_new.Repositories.BoardsRepository;
 import com.example.trello_new.Repositories.NoteRepository;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,9 +18,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/note")
 public class NoteController {
-
+    @Autowired
     NoteRepository noteRepository;
-
+    @Autowired
     BoardsRepository boardsRepository;
 
 

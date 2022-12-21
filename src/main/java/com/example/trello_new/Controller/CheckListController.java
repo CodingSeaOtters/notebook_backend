@@ -5,6 +5,7 @@ import com.example.trello_new.Entities.CheckList;
 import com.example.trello_new.Repositories.BoardsRepository;
 import com.example.trello_new.Repositories.CheckListRepository;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -15,9 +16,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/check_list")
 public class CheckListController {
-
+    @Autowired
     BoardsRepository boardsRepository;
-
+    @Autowired
     CheckListRepository checkListRepository;
 
 
@@ -42,17 +43,17 @@ public class CheckListController {
     }
 
     @GetMapping("/{Id}")
-    public CheckList getNote(@PathVariable Long Id){
+    public CheckList getNote(@PathVariable Long Id) {
         Optional<CheckList> list = checkListRepository.findById(Id);
-        if(list.isPresent()){
+        if (list.isPresent()) {
             return list.get();
-        }else {
+        } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Checklist with this id not found");
         }
     }
 
     @GetMapping("/all/{boardId}")
-    public List<CheckList> getAllNotesFromBoard(@PathVariable Long boardId){
+    public List<CheckList> getAllNotesFromBoard(@PathVariable Long boardId) {
         return checkListRepository.findAllByBoardProcedure_Id(boardId);
     }
 
@@ -79,7 +80,7 @@ public class CheckListController {
             board.getNote().remove(gottenList);
             boardsRepository.save(board);
             checkListRepository.deleteById(Id);
-        }else{
+        } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Note with this id not found");
         }
     }

@@ -5,6 +5,7 @@ import com.example.trello_new.Entities.Step;
 import com.example.trello_new.Repositories.CheckListRepository;
 import com.example.trello_new.Repositories.StepRepository;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,9 +18,10 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/step")
 public class StepController {
+    @Autowired
     StepRepository stepRepository;
+    @Autowired
     CheckListRepository checkListRepository;
-
 
     @PostMapping("/{listId}")
     public void createNote(@RequestBody String note, @PathVariable Long listId) {
