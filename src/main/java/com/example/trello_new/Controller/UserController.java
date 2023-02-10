@@ -42,9 +42,9 @@ public class UserController {
     }
 
 
-    @GetMapping("/{userId}")
-    public User getUser(@PathVariable Long userId) {
-        Optional<User> user = userRepository.findById(userId);
+    @GetMapping("/{userName}")
+    public User getUser(@PathVariable String userName) {
+        Optional<User> user = userRepository.findByUsername(userName);
         if (!user.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with this id not found");
         }

@@ -32,8 +32,6 @@ public class Board {
 
 
     //region Constructors
-
-
     public Set<CheckList> getCheckLists() {
         return checkLists;
     }
@@ -55,8 +53,6 @@ public class Board {
 
 
     //region Getter+Setter
-
-
 
     public Long getId() {
         return id;
