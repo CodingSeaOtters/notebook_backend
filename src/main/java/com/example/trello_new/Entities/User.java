@@ -1,6 +1,7 @@
 package com.example.trello_new.Entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.Hibernate;
 
@@ -16,10 +17,11 @@ public class User {
     private Long id;
 
     @Column(name = "username", unique = true)
-    private final String username;
+    private String username;
 
     @Column(name = "password")
     private String password;
+
 
     @JsonBackReference
     @ManyToMany(cascade = CascadeType.ALL)
@@ -45,6 +47,10 @@ public class User {
 
     //region Setters+Getters
 
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public Set<Board> getUses() {
         return uses;

@@ -2,6 +2,7 @@ package com.example.trello_new.Entities;
 
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
@@ -19,6 +20,7 @@ public class Board {
     private String boardName;
 
 
+    @JsonManagedReference
     @ManyToMany(mappedBy = "uses")
     private Set<User> used_By = new HashSet<>();
 

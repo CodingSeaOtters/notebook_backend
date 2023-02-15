@@ -1,20 +1,34 @@
 package com.example.trello_new.Controller;
 
+import com.auth0.jwt.interfaces.Header;
+import com.example.trello_new.DTOs.UserDto;
 import com.example.trello_new.Entities.User;
 import com.example.trello_new.Repositories.UserRepository;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/user")
 public class UserController {
     @Autowired
     UserRepository userRepository;
+
+    Gson gson = new GsonBuilder().setLenient().create();
+    PasswordEncoder myEncoder = new BCryptPasswordEncoder();
+
 
    /*   {
     "username" :  "Alfred",
@@ -23,7 +37,13 @@ public class UserController {
     */
 
     @PostMapping("")
-    public void createUser(@RequestBody User user) {
+    public void createUser(@RequestBody String json, @RequestHeader Header header){
+        System.out.println(header);
+
+        JSONObject jo = new JSONObject(json);
+        String password = jo.getString("password");
+        String passwordEncrypted = myEncoder.encode(password);
+        User user = new User(jo.getString("username"), passwordEncrypted);
         userRepository.save(user);
     }
 
@@ -33,22 +53,13 @@ public class UserController {
     }
 
     @GetMapping("/find/{username}")
-    public User getUserByName(@PathVariable String username) {
+    public ResponseEntity<UserDto> getUserByName(@PathVariable String username) {
         Optional<User> user = userRepository.findByUsername(username);
         if (!user.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with this id not found");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(makeDto(user.get()), HttpStatus.OK);
         }
-        return user.get();
-    }
-
-
-    @GetMapping("/{userName}")
-    public User getUser(@PathVariable String userName) {
-        Optional<User> user = userRepository.findByUsername(userName);
-        if (!user.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with this id not found");
-        }
-        return user.get();
     }
 
     @DeleteMapping("/{userId}")
@@ -59,6 +70,14 @@ public class UserController {
         } else {
             userRepository.deleteById(userId);
         }
+    }
 
+    public UserDto makeDto(User requested){
+        List<Long> boards = new ArrayList<>();
+        if(requested.getUses() != null) {
+            requested.getUses().forEach(board -> boards.add(board.getBoardId()));
+        }
+        UserDto sendUser = new UserDto(requested.getId(), requested.getUsername(), requested.getPassword(), boards);
+        return sendUser;
     }
 }
