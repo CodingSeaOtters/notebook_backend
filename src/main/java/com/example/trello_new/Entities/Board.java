@@ -4,8 +4,9 @@ package com.example.trello_new.Entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
 
+
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 

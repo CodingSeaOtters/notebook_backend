@@ -31,9 +31,7 @@ public class AuthenticationController {
 
     Algorithm algorithm = Algorithm.HMAC256(secret);
 
-    JWTVerifier verifier = JWT.require(algorithm)
-            .withIssuer(issuer)
-            .build();
+
 
 
     @PostMapping("/login")

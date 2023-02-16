@@ -1,11 +1,10 @@
 package com.example.trello_new.Entities;
 
-
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+
 import org.hibernate.Hibernate;
 
+import javax.persistence.*;
 import java.util.Date;
 import java.util.Objects;
 

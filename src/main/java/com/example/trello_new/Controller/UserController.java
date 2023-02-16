@@ -1,6 +1,10 @@
 package com.example.trello_new.Controller;
 
-import com.auth0.jwt.interfaces.Header;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.trello_new.DTOs.UserDto;
 import com.example.trello_new.Entities.User;
 import com.example.trello_new.Repositories.UserRepository;
@@ -19,8 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "/**" )
 @RestController
+
 @RequestMapping("/user")
 public class UserController {
     @Autowired
@@ -28,6 +33,16 @@ public class UserController {
 
     Gson gson = new GsonBuilder().setLenient().create();
     PasswordEncoder myEncoder = new BCryptPasswordEncoder();
+
+    private String issuer = "http://localhost:3000/auth";
+
+    private final String secret = "IchMagKatzen";
+
+    private Algorithm algorithm = Algorithm.HMAC256(secret);
+
+    private JWTVerifier verifier = JWT.require(algorithm)
+            .withIssuer(issuer)
+            .build();
 
 
    /*   {
@@ -37,9 +52,7 @@ public class UserController {
     */
 
     @PostMapping("")
-    public void createUser(@RequestBody String json, @RequestHeader Header header){
-        System.out.println(header);
-
+    public void createUser(@RequestBody String json){
         JSONObject jo = new JSONObject(json);
         String password = jo.getString("password");
         String passwordEncrypted = myEncoder.encode(password);
@@ -53,31 +66,42 @@ public class UserController {
     }
 
     @GetMapping("/find/{username}")
-    public ResponseEntity<UserDto> getUserByName(@PathVariable String username) {
-        Optional<User> user = userRepository.findByUsername(username);
-        if (!user.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<UserDto> getUserByName(@PathVariable String username, @RequestHeader("Authorization") String authorizationHeader)  {
+        if(validateToken(authorizationHeader, username)){
+            Optional<User> user = userRepository.findByUsername(username);
+            return user.map(value -> new ResponseEntity<>(makeDto(value), HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
         } else {
-            return new ResponseEntity<>(makeDto(user.get()), HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable Long userId) {
         Optional<User> user = userRepository.findById(userId);
-        if (!user.isPresent()) {
+        if (user.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with this id not found");
         } else {
             userRepository.deleteById(userId);
         }
     }
 
-    public UserDto makeDto(User requested){
+    private UserDto makeDto(User requested){
         List<Long> boards = new ArrayList<>();
         if(requested.getUses() != null) {
             requested.getUses().forEach(board -> boards.add(board.getBoardId()));
         }
         UserDto sendUser = new UserDto(requested.getId(), requested.getUsername(), requested.getPassword(), boards);
         return sendUser;
+    }
+
+    private Boolean validateToken(String header, String username){
+        String jwt = header.substring(7);
+        DecodedJWT decodedJWT = null;
+        try{
+            decodedJWT = verifier.verify(jwt);
+        } catch (JWTVerificationException e) {
+            System.out.println(e.getMessage());
+        }
+        return decodedJWT != null;
     }
 }
