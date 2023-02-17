@@ -1,10 +1,6 @@
 package com.example.trello_new.Entities;
 
-
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -27,25 +23,27 @@ public class Board {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "board")
-    private Set<Note> note;
+    private Set<Note> note = new HashSet<>();
 
     @JsonManagedReference
     @OneToMany(mappedBy = "boardProcedure")
-    private Set<CheckList> checkLists;
+    private Set<CheckList> checkLists = new HashSet<>();
 
 
     //region Constructors
-    public Set<CheckList> getCheckLists() {
-        return checkLists;
-    }
 
-    public void setCheckLists(Set<CheckList> checkLists) {
-        this.checkLists = checkLists;
-    }
 
     public Board(String boardName) {
         this.boardName = boardName;
 
+    }
+
+    public Board(Long id, String boardName, Set<User> used_By, Set<Note> note, Set<CheckList> checkLists) {
+        this.id = id;
+        this.boardName = boardName;
+        this.used_By = used_By;
+        this.note = note;
+        this.checkLists = new HashSet<>();
     }
 
     public Board() {
@@ -57,6 +55,13 @@ public class Board {
 
     //region Getter+Setter
 
+    public Set<CheckList> getCheckLists() {
+        return checkLists;
+    }
+
+    public void setCheckLists(Set<CheckList> checkLists) {
+        this.checkLists = checkLists;
+    }
     public Long getId() {
         return id;
     }

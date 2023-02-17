@@ -1,12 +1,9 @@
 package com.example.trello_new.Controller;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
+
 import com.example.trello_new.DTOs.UserDto;
 import com.example.trello_new.Entities.User;
+import com.example.trello_new.JWTValidate;
 import com.example.trello_new.Repositories.UserRepository;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -34,15 +31,8 @@ public class UserController {
     Gson gson = new GsonBuilder().setLenient().create();
     PasswordEncoder myEncoder = new BCryptPasswordEncoder();
 
-    private String issuer = "http://localhost:3000/auth";
+    JWTValidate verifier;
 
-    private final String secret = "IchMagKatzen";
-
-    private Algorithm algorithm = Algorithm.HMAC256(secret);
-
-    private JWTVerifier verifier = JWT.require(algorithm)
-            .withIssuer(issuer)
-            .build();
 
 
    /*   {
@@ -67,7 +57,7 @@ public class UserController {
 
     @GetMapping("/find/{username}")
     public ResponseEntity<UserDto> getUserByName(@PathVariable String username, @RequestHeader("Authorization") String authorizationHeader)  {
-        if(validateToken(authorizationHeader, username)){
+        if(verifier.validateToken(authorizationHeader)){
             Optional<User> user = userRepository.findByUsername(username);
             return user.map(value -> new ResponseEntity<>(makeDto(value), HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
         } else {
@@ -94,14 +84,6 @@ public class UserController {
         return sendUser;
     }
 
-    private Boolean validateToken(String header, String username){
-        String jwt = header.substring(7);
-        DecodedJWT decodedJWT = null;
-        try{
-            decodedJWT = verifier.verify(jwt);
-        } catch (JWTVerificationException e) {
-            System.out.println(e.getMessage());
-        }
-        return decodedJWT != null;
-    }
+
+
 }

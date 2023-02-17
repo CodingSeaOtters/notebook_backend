@@ -37,15 +37,7 @@ public class NoteController {
     public void createNote(@RequestBody String note, @PathVariable Long boardId) {
         JSONObject jo = new JSONObject(note);
         Note generatedNote = new Note();
-        generatedNote.setTitle(jo.getString("title"));
-        generatedNote.setContent(jo.getString("content"));
-        generatedNote.setImagePath(jo.getString("title_image_path"));
-        try {
-            generatedNote.setStartDate(new SimpleDateFormat("dd/MM/yyyy").parse(jo.getString("startDate")));
-            generatedNote.setEndDate(new SimpleDateFormat("dd/MM/yyyy").parse(jo.getString("endDate")));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        blabla(jo, generatedNote);
         Note createdNote = noteRepository.save(generatedNote);
         Optional<Board> board = boardsRepository.findById(boardId);
         if (board.isPresent()) {
@@ -56,6 +48,18 @@ public class NoteController {
             boardsRepository.save(gottenBoard);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Board with this id not found");
+        }
+    }
+
+    private void blabla(JSONObject jo, Note generatedNote) {
+        generatedNote.setTitle(jo.getString("title"));
+        generatedNote.setContent(jo.getString("content"));
+        generatedNote.setImagePath(jo.getString("title_image_path"));
+        try {
+            generatedNote.setStartDate(new SimpleDateFormat("dd/MM/yyyy").parse(jo.getString("startDate")));
+            generatedNote.setEndDate(new SimpleDateFormat("dd/MM/yyyy").parse(jo.getString("endDate")));
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
     }
 
@@ -81,15 +85,7 @@ public class NoteController {
         if (note.isPresent()) {
             Note gottenNote = note.get();
             JSONObject jo = new JSONObject(noteString);
-            gottenNote.setTitle(jo.getString("title"));
-            gottenNote.setContent(jo.getString("content"));
-            gottenNote.setImagePath(jo.getString("title_image_path"));
-            try {
-                gottenNote.setStartDate(new SimpleDateFormat("dd/MM/yyyy").parse(jo.getString("startDate")));
-                gottenNote.setEndDate(new SimpleDateFormat("dd/MM/yyyy").parse(jo.getString("endDate")));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+            blabla(jo, gottenNote);
             noteRepository.save(gottenNote);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Note with this id not found");
