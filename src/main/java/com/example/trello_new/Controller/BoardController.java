@@ -71,47 +71,51 @@ public class BoardController {
             } else {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Board with this id not found");
             }
-        }else{
+        } else {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized");
-            }
         }
+    }
 
-        @GetMapping("/all/{userId}")
-        public ResponseEntity<List<Long>> getAllBoardsFromUserId (@PathVariable Long
-        userId, @RequestHeader("Authorization") String authorizationHeader){
-            if (verifier.validateToken(authorizationHeader)) {
-                List<Long> sendBoards = new ArrayList<>();
-                Optional<User> user = userRepository.findById(userId);
+    @GetMapping("/all/{userId}")
+    public ResponseEntity<List<Long>> getAllBoardsFromUserId(@PathVariable Long
+                                                                     userId, @RequestHeader("Authorization") String authorizationHeader) {
+        if (verifier.validateToken(authorizationHeader)) {
+            List<Long> sendBoards = new ArrayList<>();
+            Optional<User> user = userRepository.findById(userId);
 
-                if (user.isPresent()) {
-                    User gottenUser = user.get();
-                    Set<Board> boards = gottenUser.getUses();
-                    for (Board b : boards) {
-                        sendBoards.add(b.getBoardId());
-                    }
-                    return new ResponseEntity<>(sendBoards, HttpStatus.OK);
-                } else {
-                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            if (user.isPresent()) {
+                User gottenUser = user.get();
+                Set<Board> boards = gottenUser.getUses();
+                for (Board b : boards) {
+                    sendBoards.add(b.getBoardId());
                 }
+                return new ResponseEntity<>(sendBoards, HttpStatus.OK);
             } else {
-                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
+        } else {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+    }
 
-        @PutMapping("/{boardId}")
-        public void changeName (@RequestBody Board boardName, @PathVariable Long boardId){
+    @PutMapping("/{boardId}")
+    public void changeName(@RequestBody String boardName, @PathVariable Long boardId, @RequestHeader("Authorization") String authorizationHeader) {
+        if(verifier.validateToken(authorizationHeader)) {
             Optional<Board> findBoard = boardsRepository.findById(boardId);
             if (findBoard.isPresent()) {
+                JSONObject jo = new JSONObject(boardName);
                 Board finalBoard = findBoard.get();
-                finalBoard.setBoardName(boardName.getBoardName());
+                finalBoard.setBoardName(jo.getString("boardName"));
                 boardsRepository.save(finalBoard);
             } else {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Board with this id not found");
             }
         }
+    }
 
-        @DeleteMapping("/{boardId}")
-        public void deleteBoard (@PathVariable Long boardId){
+    @DeleteMapping("/{boardId}")
+    public void deleteBoard(@PathVariable Long boardId, @RequestHeader("Authorization") String authorizationHeader) {
+        if (verifier.validateToken(authorizationHeader)) {
             Optional<Board> board = boardsRepository.findById(boardId);
             if (board.isPresent()) {
                 Board gottenBoard = board.get();
@@ -125,5 +129,6 @@ public class BoardController {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with this id not found");
             }
         }
-
     }
+
+}
