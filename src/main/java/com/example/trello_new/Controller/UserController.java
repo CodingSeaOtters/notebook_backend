@@ -31,7 +31,7 @@ public class UserController {
     Gson gson = new GsonBuilder().setLenient().create();
     PasswordEncoder myEncoder = new BCryptPasswordEncoder();
 
-    JWTValidate verifier;
+    JWTValidate verifier = new JWTValidate();
 
 
 

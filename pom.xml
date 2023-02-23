@@ -11,7 +11,7 @@
     <groupId>com.example</groupId>
     <artifactId>Trello_new</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <name>Trello_new</name>
     <description>Trello_new</description>
     <properties>
@@ -81,5 +81,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

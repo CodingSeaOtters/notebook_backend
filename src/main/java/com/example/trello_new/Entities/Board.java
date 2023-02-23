@@ -25,9 +25,6 @@ public class Board {
     @OneToMany(mappedBy = "board")
     private Set<Note> note = new HashSet<>();
 
-    @JsonManagedReference
-    @OneToMany(mappedBy = "boardProcedure")
-    private Set<CheckList> checkLists = new HashSet<>();
 
 
     //region Constructors
@@ -38,12 +35,11 @@ public class Board {
 
     }
 
-    public Board(Long id, String boardName, Set<User> used_By, Set<Note> note, Set<CheckList> checkLists) {
+    public Board(Long id, String boardName, Set<User> used_By, Set<Note> note) {
         this.id = id;
         this.boardName = boardName;
         this.used_By = used_By;
         this.note = note;
-        this.checkLists = new HashSet<>();
     }
 
     public Board() {
@@ -55,13 +51,6 @@ public class Board {
 
     //region Getter+Setter
 
-    public Set<CheckList> getCheckLists() {
-        return checkLists;
-    }
-
-    public void setCheckLists(Set<CheckList> checkLists) {
-        this.checkLists = checkLists;
-    }
     public Long getId() {
         return id;
     }

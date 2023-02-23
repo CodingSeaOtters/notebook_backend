@@ -2,6 +2,7 @@ package com.example.trello_new.Controller;
 
 import com.example.trello_new.Entities.Board;
 import com.example.trello_new.Entities.Note;
+import com.example.trello_new.JWTValidate;
 import com.example.trello_new.Repositories.BoardsRepository;
 import com.example.trello_new.Repositories.NoteRepository;
 import org.json.JSONObject;
@@ -24,6 +25,8 @@ public class NoteController {
     BoardsRepository boardsRepository;
 
 
+    JWTValidate verifier = new JWTValidate();
+
 
     /* {
   "title" : "",
@@ -34,48 +37,57 @@ public class NoteController {
   }
    */
     @PostMapping("/{boardId}")
-    public void createNote(@RequestBody String note, @PathVariable Long boardId) {
-        JSONObject jo = new JSONObject(note);
-        Note generatedNote = new Note();
-        blabla(jo, generatedNote);
-        Note createdNote = noteRepository.save(generatedNote);
-        Optional<Board> board = boardsRepository.findById(boardId);
-        if (board.isPresent()) {
-            Board gottenBoard = board.get();
-            gottenBoard.getNote().add(createdNote);
-            createdNote.setBoard(gottenBoard);
-            noteRepository.save(createdNote);
-            boardsRepository.save(gottenBoard);
+    public void createNote(@RequestBody String note, @PathVariable Long boardId, @RequestHeader("Authorization") String authorizationHeader) {
+        if (verifier.validateToken(authorizationHeader)) {
+            JSONObject jo = new JSONObject(note);
+            Note generatedNote = new Note();
+            fillNote(jo, generatedNote);
+            Note createdNote = noteRepository.save(generatedNote);
+            Optional<Board> board = boardsRepository.findById(boardId);
+            if (board.isPresent()) {
+                Board gottenBoard = board.get();
+                gottenBoard.getNote().add(createdNote);
+                createdNote.setBoard(gottenBoard);
+                noteRepository.save(createdNote);
+                boardsRepository.save(gottenBoard);
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Board with this id not found");
+            }
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Board with this id not found");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized");
         }
     }
 
-    private void blabla(JSONObject jo, Note generatedNote) {
+    private void fillNote(JSONObject jo, Note generatedNote) {
         generatedNote.setTitle(jo.getString("title"));
         generatedNote.setContent(jo.getString("content"));
         generatedNote.setImagePath(jo.getString("title_image_path"));
         try {
-            generatedNote.setStartDate(new SimpleDateFormat("dd/MM/yyyy").parse(jo.getString("startDate")));
-            generatedNote.setEndDate(new SimpleDateFormat("dd/MM/yyyy").parse(jo.getString("endDate")));
+            generatedNote.setStartDate(new SimpleDateFormat("yyyy-MM-dd").parse(jo.getString("startDate")));
+            generatedNote.setEndDate(new SimpleDateFormat("yyyy-MM-dd").parse(jo.getString("endDate")));
         } catch (ParseException e) {
             e.printStackTrace();
         }
     }
 
     @GetMapping("/{noteId}")
-    public Note getNote(@PathVariable Long noteId){
-        Optional<Note> note = noteRepository.findById(noteId);
-        if(note.isPresent()){
-            return note.get();
-        }else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Note with this id not found");
+    @ResponseBody
+    public Note getNote(@PathVariable Long noteId, @RequestHeader("Authorization") String authorizationHeader) {
+        if (verifier.validateToken(authorizationHeader)) {
+            Optional<Note> note = noteRepository.findById(noteId);
+            if (note.isPresent()) {
+                return note.get();
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Note with this id not found");
+            }
+        } else {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized");
         }
     }
 
 
     @GetMapping("/all/{boardId}")
-    public List<Note> getAllNotesFromBoard(@PathVariable Long boardId){
+    public List<Note> getAllNotesFromBoard(@PathVariable Long boardId) {
         return noteRepository.findAllByBoardId(boardId);
     }
 
@@ -85,7 +97,7 @@ public class NoteController {
         if (note.isPresent()) {
             Note gottenNote = note.get();
             JSONObject jo = new JSONObject(noteString);
-            blabla(jo, gottenNote);
+            fillNote(jo, gottenNote);
             noteRepository.save(gottenNote);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Note with this id not found");
@@ -101,7 +113,7 @@ public class NoteController {
             board.getNote().remove(gottenNote);
             boardsRepository.save(board);
             noteRepository.deleteById(noteId);
-        }else{
+        } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Note with this id not found");
         }
     }

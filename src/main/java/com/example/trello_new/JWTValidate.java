@@ -20,7 +20,7 @@ public class JWTValidate {
             .withIssuer(issuer)
             .build();
 
-    public Boolean validateToken(String header){
+    public boolean validateToken(String header){
         String jwt = header.substring(7);
         DecodedJWT decodedJWT = null;
         try{
@@ -29,6 +29,17 @@ public class JWTValidate {
             System.out.println(e.getMessage());
         }
         return decodedJWT != null && decodedJWT.getExpiresAt().after(new Date());
+    }
+
+    public boolean isExpired(String header){
+        String jwt = header.substring(7);
+        DecodedJWT decodedJWT = null;
+        try{
+            decodedJWT = verifier.verify(jwt);
+        } catch (JWTVerificationException e) {
+            System.out.println(e.getMessage());
+        }
+        return decodedJWT.getExpiresAt().before(new Date());
     }
 
 }
