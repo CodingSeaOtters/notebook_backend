@@ -105,16 +105,20 @@ public class NoteController {
     }
 
     @DeleteMapping("/{noteId}")
-    public void deleteNote(@PathVariable Long noteId) {
-        Optional<Note> note = noteRepository.findById(noteId);
-        if (note.isPresent()) {
-            Note gottenNote = note.get();
-            Board board = gottenNote.getBoard();
-            board.getNote().remove(gottenNote);
-            boardsRepository.save(board);
-            noteRepository.deleteById(noteId);
+    public void deleteNote(@PathVariable Long noteId, @RequestHeader("Authorization") String authorizationHeader) {
+        if (verifier.validateToken(authorizationHeader)) {
+            Optional<Note> note = noteRepository.findById(noteId);
+            if (note.isPresent()) {
+                Note gottenNote = note.get();
+                Board board = gottenNote.getBoard();
+                board.getNote().remove(gottenNote);
+                boardsRepository.save(board);
+                noteRepository.deleteById(noteId);
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Note with this id not found");
+            }
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Note with this id not found");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT False");
         }
     }
 }
