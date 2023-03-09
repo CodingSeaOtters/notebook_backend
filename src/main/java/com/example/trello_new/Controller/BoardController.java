@@ -58,7 +58,6 @@ public class BoardController {
     @GetMapping("/note/{boardId}")
     @ResponseBody
     public List<Long> getNoteIdsFromBoard(@PathVariable Long boardId, @RequestHeader("Authorization") String authorizationHeader) {
-
         if (verifier.validateToken(authorizationHeader)) {
             List<Long> x = new ArrayList<>();
             Optional<Board> board = boardsRepository.findById(boardId);
@@ -100,7 +99,7 @@ public class BoardController {
 
     @PutMapping("/{boardId}")
     public void changeName(@RequestBody String boardName, @PathVariable Long boardId, @RequestHeader("Authorization") String authorizationHeader) {
-        if(verifier.validateToken(authorizationHeader)) {
+        if (verifier.validateToken(authorizationHeader)) {
             Optional<Board> findBoard = boardsRepository.findById(boardId);
             if (findBoard.isPresent()) {
                 JSONObject jo = new JSONObject(boardName);
