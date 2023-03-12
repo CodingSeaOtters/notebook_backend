@@ -54,7 +54,7 @@ public class AuthenticationController {
                         .withExpiresAt(new Date(System.currentTimeMillis() + (30 * 60_000)))
                         .sign(algorithm);
 
-                return new ResponseEntity<>(jwtToken, HttpStatus.OK);
+                return new ResponseEntity<>(jwtToken, HttpStatus.ACCEPTED);
             }
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

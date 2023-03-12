@@ -42,12 +42,13 @@ public class UserController {
     */
 
     @PostMapping("")
-    public void createUser(@RequestBody String json){
+    public ResponseEntity<?> createUser(@RequestBody String json){
         JSONObject jo = new JSONObject(json);
         String password = jo.getString("password");
         String passwordEncrypted = myEncoder.encode(password);
         User user = new User(jo.getString("username"), passwordEncrypted);
         userRepository.save(user);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping("/find/all")
@@ -80,8 +81,7 @@ public class UserController {
         if(requested.getUses() != null) {
             requested.getUses().forEach(board -> boards.add(board.getBoardId()));
         }
-        UserDto sendUser = new UserDto(requested.getId(), requested.getUsername(), requested.getPassword(), boards);
-        return sendUser;
+        return new UserDto(requested.getId(), requested.getUsername(), requested.getPassword(), boards);
     }
 
 
