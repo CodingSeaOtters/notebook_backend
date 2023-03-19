@@ -8,12 +8,13 @@ import com.example.trello_new.Repositories.NoteRepository;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @RestController
@@ -87,8 +88,12 @@ public class NoteController {
 
 
     @GetMapping("/all/{boardId}")
-    public List<Note> getAllNotesFromBoard(@PathVariable Long boardId) {
-        return noteRepository.findAllByBoardId(boardId);
+    public ResponseEntity<ArrayList<Note>> getAllNotesFromBoard(@PathVariable Long boardId, @RequestHeader("Authorization") String authorizationHeader) {
+        if (verifier.validateToken(authorizationHeader)) {
+            return new ResponseEntity<>(noteRepository.findAllByBoardId(boardId), HttpStatus.OK);
+        } else {
+            return  new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
     }
 
     @PutMapping("/{noteId}")

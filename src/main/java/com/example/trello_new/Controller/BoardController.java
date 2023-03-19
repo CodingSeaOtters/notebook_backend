@@ -1,5 +1,6 @@
 package com.example.trello_new.Controller;
 
+import com.example.trello_new.DTOs.BoardDto;
 import com.example.trello_new.Entities.Board;
 import com.example.trello_new.Entities.Note;
 import com.example.trello_new.Entities.User;
@@ -76,17 +77,17 @@ public class BoardController {
     }
 
     @GetMapping("/all/{userId}")
-    public ResponseEntity<List<Long>> getAllBoardsFromUserId(@PathVariable Long
+    public ResponseEntity<List<BoardDto>> getAllBoardsFromUserId(@PathVariable Long
                                                                      userId, @RequestHeader("Authorization") String authorizationHeader) {
         if (verifier.validateToken(authorizationHeader)) {
-            List<Long> sendBoards = new ArrayList<>();
+            List<BoardDto> sendBoards = new ArrayList<>();
             Optional<User> user = userRepository.findById(userId);
 
             if (user.isPresent()) {
                 User gottenUser = user.get();
                 Set<Board> boards = gottenUser.getUses();
                 for (Board b : boards) {
-                    sendBoards.add(b.getBoardId());
+                    sendBoards.add(new BoardDto(b.getId(), b.getBoardName()));
                 }
                 return new ResponseEntity<>(sendBoards, HttpStatus.OK);
             } else {
